@@ -63,6 +63,54 @@ Replace `<YOUR_GIT_URL>` with your repository URL.
 - Add a CLI to `sqlite_demo.py`/`model_training.py` supporting `--db`, `--table`, and `--csv` flags.
 - Add tests and a short example notebook showing results.
 
+**API / Postman testing**
+
+This project includes a Flask app (`app.py`) that will load an exported model file (`logistic_model.pkl` or `rf_model.pkl`) if present and expose two endpoints useful for testing with Postman or curl:
+
+- `GET /info` — returns whether a model is loaded and the model class name.
+- `POST /predict` — accepts JSON with an `input` array and returns a predicted label.
+
+Setup and run (recommended using a virtual environment):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+# produce a trained model (creates logistic_model.pkl)
+python3 sqlite_demo.py
+# start the API
+python3 app.py
+```
+
+Postman examples
+
+- GET /info
+	- Method: `GET`
+	- URL: `http://localhost:5000/info`
+	- Expected response (when model exists):
+		```json
+		{"loaded": true, "model_path": ".../logistic_model.pkl", "model_class": "LogisticRegression"}
+		```
+
+- POST /predict
+	- Method: `POST`
+	- URL: `http://localhost:5000/predict`
+	- Body (JSON example — adjust length to match model's expected features):
+		```json
+		{"input": [30, 80000, 1]} 
+		```
+	- Expected response (on success):
+		```json
+		{"prediction": 1}
+		```
+
+Troubleshooting
+
+- If the server fails to start with `ModuleNotFoundError: No module named 'sklearn'`, create and activate the virtual environment and install `scikit-learn` as shown above. The error occurs when unpickling a model that depends on scikit-learn.
+- If you don't want the CSV overwritten, keep a copy of `Social_Network_Ads - Social_Network_Ads.csv` before running `sqlite_demo.py` (or I can add an automatic backup step).
+
+If you want, I can also export a ready-made Postman collection (v2.1 JSON) with the two requests pre-configured — shall I add that to the repo?
+
 **Contact**
 If you want me to add the CLI flags or update `model_training.py` to persist its DataFrame into the SQLite DB, tell me which option you prefer.
 
